@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fresher Editor | ResuMate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    /* --- DARK THEME VARIABLES --- */
+    :root {
+      /* UI Colors */
+      --bg-body: #050505;
+      --bg-panel: #121212;
+      --input-bg: #1e1e2e;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --accent: #38bdf8; /* Blue for Fresher */
+
+      /* Paper Colors (Internal Resume) */
+      --paper-sidebar-bg: #0f172a; 
+      --paper-sidebar-text: #f8fafc;
+      --paper-accent: #38bdf8;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      background: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      height: 100vh;
+      overflow: hidden; 
+      color: var(--text-main);
+    }
+
+    @page { size: A4; margin: 0; }
+
+    /* --- LAYOUT --- */
+    .app-wrapper { display: flex; height: 100vh; width: 100vw; }
+
+    /* LEFT: EDITOR PANE (Dark Mode) */
+    .editor-pane {
+      width: 460px; 
+      min-width: 460px;
+      background: var(--bg-panel);
+      padding: 25px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+      z-index: 20;
+    }
+
+    /* Dark Mode Form Styling */
+    .form-section {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .section-header {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    /* Dark Mode Inputs */
+    .form-control {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 0.9rem;
+    }
+    .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--accent);
+        color: white;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+    }
+    .form-control::placeholder { color: #52525b; }
+    label.small { color: var(--text-muted) !important; margin-bottom: 5px; display: block; }
+
+    /* RIGHT: PREVIEW PANE (Dark Background to make white paper pop) */
+    .preview-pane {
+      flex: 1;
+      background: #000000; /* Pure black behind paper */
+      background-image: radial-gradient(#1a1b26 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    /* --- THE A4 PAPER (MUST REMAIN WHITE) --- */
+    .resume-paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: white; /* Paper is always white */
+      color: #333; /* Text on paper is dark */
+      font-family: 'Open Sans', sans-serif;
+      display: flex;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5); /* Stronger shadow for contrast */
+      transform: scale(0.85);
+      transform-origin: top center;
+    }
+
+    /* Responsive Scale */
+    @media (max-width: 1400px) { .resume-paper { transform: scale(0.75); margin-bottom: -150px; } }
+
+    /* --- RESUME INTERNAL STYLING (Same as before) --- */
+    .paper-sidebar {
+      width: 32%;
+      background-color: var(--paper-sidebar-bg);
+      color: var(--paper-sidebar-text);
+      padding: 30px 20px;
+      text-align: left;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-title {
+      font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
+      color: var(--paper-accent); margin-top: 25px; margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;
+    }
+    .info-item { font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; color: #e2e8f0; word-break: break-all; }
+    .info-item i { color: var(--paper-accent); min-width: 15px; }
+    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; color: white;
+    }
+    .list-content { font-size: 0.8rem; line-height: 1.5; color: #cbd5e1; }
+
+    .paper-main { width: 68%; padding: 40px 35px; color: #334155; display: flex; flex-direction: column; }
+    .main-header-name { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 2.2rem; text-transform: uppercase; line-height: 1; color: #0f172a; }
+    .main-header-role { font-weight: 600; font-size: 1.1rem; color: #0ea5e9; margin-top: 5px; letter-spacing: 1px; }
+    .main-title {
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase;
+      color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .main-title i { color: #0ea5e9; }
+    .entry-block { margin-bottom: 15px; }
+    .entry-title { font-weight: 700; font-size: 0.95rem; color: #1e293b; }
+    .entry-subtitle { font-weight: 600; font-size: 0.85rem; color: #0ea5e9; }
+    .entry-date { font-size: 0.8rem; color: #64748b; font-style: italic; display: block; margin-bottom: 2px;}
+    .entry-desc { font-size: 0.85rem; line-height: 1.5; color: #475569; margin-top: 3px; text-align: justify; }
+    .declaration { margin-top: auto; font-size: 0.75rem; color: #94a3b8; font-style: italic; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+
+    /* --- PRINT SETTINGS --- */
+    @media print {
+      body * { visibility: hidden; } 
+      .resume-paper, .resume-paper * { visibility: visible; } 
+      .resume-paper { position: absolute; left: 0; top: 0; margin: 0; padding: 0; width: 100%; height: 100%; box-shadow: none; transform: none !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+    
+    /* Navbar override for this page */
+    .btn-back { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+    .btn-back:hover { color: white; }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    
+    <div class="editor-pane no-print">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+        <a href="index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Home</a>
+        <h5 class="fw-bold m-0 text-white">Fresher<span class="text-info">Mode</span></h5>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted small">Fill details to generate</span>
+        <button onclick="handlePrint()" class="btn btn-primary btn-sm fw-bold shadow-sm px-4 rounded-pill">
+          <i class="bi bi-download me-1"></i> Download
+        </button>
+      </div>
+
+      <form id="resumeForm">
+        
+        <div class="form-section">
+          <div class="section-header">Personal Info</div>
+          <input type="text" class="form-control form-control-sm mb-2" id="name" placeholder="Full Name" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="role" placeholder="Target Role" oninput="update()">
+          <textarea class="form-control form-control-sm" id="summary" rows="3" placeholder="Summary" oninput="update()"></textarea>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">Contact & Links</div>
+          <input type="text" class="form-control form-control-sm mb-2" id="phone" placeholder="Phone" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="email" placeholder="Email" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="linkedin" placeholder="LinkedIn" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="github" placeholder="GitHub" oninput="update()">
+          <input type="text" class="form-control form-control-sm" id="location" placeholder="City" oninput="update()">
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">Sidebar Details</div>
+          <label class="small">Technical Skills</label>
+          <textarea class="form-control form-control-sm mb-2" id="skills" rows="2" placeholder="Java, Python..." oninput="update()"></textarea>
+          
+          <label class="small">Soft Skills</label>
+          <textarea class="form-control form-control-sm mb-2" id="softSkills" rows="2" placeholder="Leadership..." oninput="update()"></textarea>
+          
+          <label class="small">Languages</label>
+          <textarea class="form-control form-control-sm mb-2" id="languages" rows="1" placeholder="English, Hindi" oninput="update()"></textarea>
+          
+          <label class="small">Certifications</label>
+          <textarea class="form-control form-control-sm" id="certs" rows="3" placeholder="One per line..." oninput="update()"></textarea>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">Internship / Experience</div>
+          <input type="text" class="form-control form-control-sm mb-2" id="exp_role" placeholder="Role" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="exp_company" placeholder="Company" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="exp_date" placeholder="Duration" oninput="update()">
+          <textarea class="form-control form-control-sm" id="exp_desc" rows="3" placeholder="Description..." oninput="update()"></textarea>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">Projects</div>
+          <div class="mb-3 border-bottom border-secondary border-opacity-25 pb-3">
+            <input type="text" class="form-control form-control-sm mb-2" id="proj1_title" placeholder="Project 1 Title" oninput="update()">
+            <textarea class="form-control form-control-sm" id="proj1_desc" rows="2" placeholder="Description..." oninput="update()"></textarea>
+          </div>
+          <div>
+            <input type="text" class="form-control form-control-sm mb-2" id="proj2_title" placeholder="Project 2 Title" oninput="update()">
+            <textarea class="form-control form-control-sm" id="proj2_desc" rows="2" placeholder="Description..." oninput="update()"></textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">Education</div>
+          <input type="text" class="form-control form-control-sm mb-2" id="edu1_school" placeholder="College Name" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="edu1_degree" placeholder="Degree" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-3" id="edu1_year" placeholder="Year" oninput="update()">
+          
+          <input type="text" class="form-control form-control-sm mb-2" id="edu2_school" placeholder="School Name" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="edu2_degree" placeholder="Class XII" oninput="update()">
+          <input type="text" class="form-control form-control-sm" id="edu2_year" placeholder="Year" oninput="update()">
+        </div>
+        
+        <div class="form-section">
+          <div class="section-header">Achievements</div>
+          <textarea class="form-control form-control-sm" id="achieve" rows="3" placeholder="Achievements..." oninput="update()"></textarea>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="preview-pane">
+      <div class="resume-paper">
+        <div class="paper-sidebar">
+          <div class="sidebar-title" style="margin-top: 0;">Contact</div>
+          <div class="info-item"><i class="bi bi-telephone-fill"></i> <span id="p_phone">+91 98765 43210</span></div>
+          <div class="info-item"><i class="bi bi-envelope-fill"></i> <span id="p_email">hello@email.com</span></div>
+          <div class="info-item"><i class="bi bi-geo-alt-fill"></i> <span id="p_location">Mumbai, India</span></div>
+          <div class="info-item"><i class="bi bi-linkedin"></i> <span id="p_linkedin">linkedin.com/in/user</span></div>
+          <div class="info-item"><i class="bi bi-github"></i> <span id="p_github">github.com/user</span></div>
+
+          <div class="sidebar-title">Tech Skills</div>
+          <div class="tag-container" id="p_skills"><span class="tag">Java</span><span class="tag">Python</span></div>
+
+          <div class="sidebar-title">Soft Skills</div>
+          <div class="tag-container" id="p_softSkills"><span class="tag">Teamwork</span></div>
+
+          <div class="sidebar-title">Languages</div>
+          <div class="tag-container" id="p_languages"><span class="tag">English</span></div>
+
+          <div class="sidebar-title">Certifications</div>
+          <div id="p_certs" class="list-content">• AWS Certified Cloud Practitioner</div>
+        </div>
+
+        <div class="paper-main">
+          <div class="mb-4">
+            <h1 class="main-header-name" id="p_name">Your Name</h1>
+            <div class="main-header-role" id="p_role">Fresher / Role Title</div>
+          </div>
+          <div class="entry-desc mb-4" id="p_summary">A motivated individual seeking an entry-level position...</div>
+
+          <div id="section-exp">
+            <div class="main-title"><i class="bi bi-briefcase-fill"></i> Experience</div>
+            <div class="entry-block">
+                <div class="d-flex justify-content-between">
+                    <div class="entry-title" id="p_exp_role">Intern Role</div>
+                    <div class="entry-date" id="p_exp_date">Jan 2024 - Mar 2024</div>
+                </div>
+                <div class="entry-subtitle" id="p_exp_company">Company Name</div>
+                <div class="entry-desc" id="p_exp_desc">Description...</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="main-title"><i class="bi bi-code-slash"></i> Projects</div>
+            <div class="entry-block">
+              <div class="entry-title" id="p_proj1_title">Project 01</div>
+              <div class="entry-desc" id="p_proj1_desc">Description...</div>
+            </div>
+            <div class="entry-block">
+              <div class="entry-title" id="p_proj2_title">Project 02</div>
+              <div class="entry-desc" id="p_proj2_desc">Description...</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="main-title"><i class="bi bi-mortarboard-fill"></i> Education</div>
+            <div class="entry-block mb-2">
+              <div class="d-flex justify-content-between">
+                <div class="entry-title" id="p_edu1_school">University</div>
+                <div class="entry-date" id="p_edu1_year">2024</div>
+              </div>
+              <div class="entry-subtitle" id="p_edu1_degree">Degree</div>
+            </div>
+            <div class="entry-block">
+              <div class="d-flex justify-content-between">
+                <div class="entry-title" id="p_edu2_school">School</div>
+                <div class="entry-date" id="p_edu2_year">2020</div>
+              </div>
+              <div class="entry-subtitle" id="p_edu2_degree">HSC</div>
+            </div>
+          </div>
+
+          <div>
+             <div class="main-title"><i class="bi bi-trophy-fill"></i> Achievements</div>
+             <div id="p_achieve" class="entry-desc">• 1st Rank in Coding Contest</div>
+          </div>
+
+          <div class="declaration">
+            I hereby declare that the above-mentioned information is true to the best of my knowledge and belief.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handlePrint() {
+      window.print();
+      setTimeout(() => { window.location.href = 'success.html'; }, 1000);
+    }
+
+    function update() {
+      const getVal = (id) => document.getElementById(id).value;
+      const setTxt = (id, val, def) => {
+        const el = document.getElementById(id);
+        if(el) el.innerText = val || def;
+      };
+
+      setTxt('p_name', getVal('name'), 'YOUR NAME');
+      setTxt('p_role', getVal('role'), 'FRESHER / ROLE');
+      setTxt('p_summary', getVal('summary'), 'A motivated individual seeking an entry-level position...');
+      
+      setTxt('p_phone', getVal('phone'), '+91 00000 00000');
+      setTxt('p_email', getVal('email'), 'email@example.com');
+      setTxt('p_location', getVal('location'), 'City, Country');
+      setTxt('p_linkedin', getVal('linkedin'), 'linkedin.com/in/user');
+      setTxt('p_github', getVal('github'), 'github.com/user');
+
+      setTxt('p_exp_role', getVal('exp_role'), 'Intern Role');
+      setTxt('p_exp_company', getVal('exp_company'), 'Company Name');
+      setTxt('p_exp_date', getVal('exp_date'), 'Duration');
+      setTxt('p_exp_desc', getVal('exp_desc'), 'Description...');
+
+      setTxt('p_proj1_title', getVal('proj1_title'), 'Project Title 01');
+      setTxt('p_proj1_desc', getVal('proj1_desc'), 'Description...');
+      setTxt('p_proj2_title', getVal('proj2_title'), 'Project Title 02');
+      setTxt('p_proj2_desc', getVal('proj2_desc'), 'Description...');
+
+      setTxt('p_edu1_school', getVal('edu1_school'), 'University');
+      setTxt('p_edu1_degree', getVal('edu1_degree'), 'Degree');
+      setTxt('p_edu1_year', getVal('edu1_year'), 'Year');
+      setTxt('p_edu2_school', getVal('edu2_school'), 'School');
+      setTxt('p_edu2_degree', getVal('edu2_degree'), 'XII');
+      setTxt('p_edu2_year', getVal('edu2_year'), 'Year');
+
+      function arrayToTags(inputId, containerId) {
+        const input = getVal(inputId);
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        if(input.trim()) {
+          input.split(',').forEach(item => {
+            if(item.trim()) {
+              const span = document.createElement('span');
+              span.className = 'tag';
+              span.innerText = item.trim();
+              container.appendChild(span);
+            }
+          });
+        }
+      }
+      arrayToTags('skills', 'p_skills');
+      arrayToTags('softSkills', 'p_softSkills'); 
+      arrayToTags('languages', 'p_languages');
+
+      function textToBullets(inputId, containerId) {
+          const input = getVal(inputId);
+          const container = document.getElementById(containerId);
+          if(input.trim()) {
+             container.innerHTML = '• ' + input.replace(/\n/g, '<br>• ');
+          }
+      }
+      textToBullets('certs', 'p_certs');
+      textToBullets('achieve', 'p_achieve');
+    }
+  </script>
+</body>
+</html>

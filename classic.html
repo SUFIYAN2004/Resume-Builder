@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classic Editor | ResuMate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    /* --- DARK THEME VARIABLES --- */
+    :root {
+      /* UI Colors */
+      --bg-body: #050505;
+      --bg-panel: #121212;
+      --input-bg: #1e1e2e;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --accent: #f8fafc; /* White/Grey for Classic Theme */
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      background: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      height: 100vh;
+      overflow: hidden; 
+      color: var(--text-main);
+    }
+
+    @page { size: A4; margin: 0; }
+
+    /* --- LAYOUT --- */
+    .app-wrapper { display: flex; height: 100vh; width: 100vw; }
+
+    /* LEFT: EDITOR PANE (Dark Mode) */
+    .editor-pane {
+      width: 450px; 
+      min-width: 450px;
+      background: var(--bg-panel);
+      padding: 25px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+      z-index: 20;
+    }
+
+    /* Dark Mode Form Styling */
+    .form-group {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+      display: block;
+    }
+
+    /* Dark Mode Inputs */
+    .form-control {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 0.9rem;
+    }
+    .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--accent);
+        color: white;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+    .form-control::placeholder { color: #52525b; }
+
+    /* RIGHT: PREVIEW PANE */
+    .preview-pane {
+      flex: 1;
+      background: #000000;
+      background-image: radial-gradient(#1a1b26 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    /* --- THE CLASSIC PAPER (Harvard Style) --- */
+    /* Must remain White with Serif Font for ATS */
+    .resume-paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      padding: 15mm 20mm; /* Standard Margins */
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      color: #000;
+      font-family: 'Georgia', 'Times New Roman', Times, serif; 
+      transform: scale(0.85);
+      transform-origin: top center;
+    }
+
+    /* TYPOGRAPHY (Paper) */
+    .resume-header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+    .name { font-size: 22pt; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+    .contact-line { font-size: 10pt; margin-bottom: 0; }
+    .contact-line span { margin: 0 3px; }
+
+    .section-title {
+        font-size: 11pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 1px solid #000;
+        margin-top: 15px;
+        margin-bottom: 8px;
+        padding-bottom: 2px;
+    }
+
+    .entry { margin-bottom: 10px; }
+    .entry-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .entry-title { font-weight: bold; font-size: 11pt; }
+    .entry-location { font-size: 10pt; }
+    .entry-sub-header { display: flex; justify-content: space-between; align-items: baseline; font-style: italic; margin-bottom: 2px; }
+    .entry-role { font-size: 10.5pt; }
+    .entry-date { font-size: 10pt; }
+    .entry-list { margin: 2px 0 0 0; padding-left: 18px; font-size: 10.5pt; line-height: 1.3; }
+    .entry-list li { margin-bottom: 2px; }
+    .skills-block { font-size: 10.5pt; line-height: 1.4; }
+    .skill-category { font-weight: bold; }
+
+    /* Responsive Scale */
+    @media (max-width: 1400px) { .resume-paper { transform: scale(0.75); margin-bottom: -150px; } }
+
+    /* PRINT */
+    @media print {
+      body * { visibility: hidden; }
+      .resume-paper, .resume-paper * { visibility: visible; }
+      .resume-paper { position: absolute; left: 0; top: 0; margin: 0; padding: 15mm 20mm; width: 100%; height: 100%; box-shadow: none; transform: none !important; }
+    }
+
+    .btn-back { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+    .btn-back:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    
+    <div class="editor-pane no-print">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+            <a href="index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Home</a>
+            <h5 class="fw-bold m-0 text-white">Classic<span class="text-secondary">ATS</span></h5>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="text-muted small">Optimized for Parsing</span>
+            <button onclick="handlePrint()" class="btn btn-light btn-sm fw-bold shadow-sm px-4 rounded-pill">
+              <i class="bi bi-download me-1"></i> Download
+            </button>
+        </div>
+
+        <form>
+            <div class="form-group">
+                <span class="section-label">Header Details</span>
+                <input type="text" class="form-control mb-2" id="name" placeholder="Full Name" oninput="render()">
+                <input type="text" class="form-control mb-2" id="phone" placeholder="Phone" oninput="render()">
+                <input type="text" class="form-control mb-2" id="email" placeholder="Email" oninput="render()">
+                <input type="text" class="form-control mb-2" id="linkedin" placeholder="LinkedIn URL" oninput="render()">
+                <input type="text" class="form-control" id="location" placeholder="City, State" oninput="render()">
+            </div>
+
+            <div class="form-group">
+                <span class="section-label">Education</span>
+                <input type="text" class="form-control mb-1" id="edu_school" placeholder="University Name" oninput="render()">
+                <input type="text" class="form-control mb-1" id="edu_location" placeholder="City, State" oninput="render()">
+                <input type="text" class="form-control mb-1" id="edu_degree" placeholder="Degree" oninput="render()">
+                <input type="text" class="form-control" id="edu_date" placeholder="Graduation Date" oninput="render()">
+            </div>
+
+            <div class="form-group">
+                <span class="section-label">Experience 1 (Latest)</span>
+                <input type="text" class="form-control mb-1" id="job1_company" placeholder="Company" oninput="render()">
+                <input type="text" class="form-control mb-1" id="job1_location" placeholder="Location" oninput="render()">
+                <input type="text" class="form-control mb-1" id="job1_role" placeholder="Role Title" oninput="render()">
+                <input type="text" class="form-control mb-2" id="job1_date" placeholder="Date" oninput="render()">
+                <textarea class="form-control" id="job1_desc" rows="3" placeholder="Bullet points (one per line)" oninput="render()"></textarea>
+            </div>
+
+            <div class="form-group">
+                <span class="section-label">Experience 2</span>
+                <input type="text" class="form-control mb-1" id="job2_company" placeholder="Company" oninput="render()">
+                <input type="text" class="form-control mb-1" id="job2_location" placeholder="Location" oninput="render()">
+                <input type="text" class="form-control mb-1" id="job2_role" placeholder="Role Title" oninput="render()">
+                <input type="text" class="form-control mb-2" id="job2_date" placeholder="Date" oninput="render()">
+                <textarea class="form-control" id="job2_desc" rows="3" placeholder="Bullet points..." oninput="render()"></textarea>
+            </div>
+
+            <div class="form-group">
+                <span class="section-label">Skills & Interests</span>
+                <textarea class="form-control" id="skills" rows="3" placeholder="Technical: Java, Python&#10;Languages: English, Spanish" oninput="render()"></textarea>
+            </div>
+        </form>
+    </div>
+
+    <div class="preview-pane">
+        <div class="resume-paper">
+            
+            <div class="resume-header">
+                <div class="name" id="p_name">John Doe</div>
+                <p class="contact-line">
+                    <span id="p_location">New York, NY</span> | 
+                    <span id="p_phone">555-0100</span> | 
+                    <span id="p_email">john@email.com</span> | 
+                    <span id="p_linkedin">linkedin.com/in/john</span>
+                </p>
+            </div>
+
+            <div class="section-title">Education</div>
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title" id="p_edu_school">Harvard University</div>
+                    <div class="entry-location" id="p_edu_location">Cambridge, MA</div>
+                </div>
+                <div class="entry-sub-header">
+                    <div class="entry-role" id="p_edu_degree">Bachelor of Arts in Computer Science</div>
+                    <div class="entry-date" id="p_edu_date">May 2024</div>
+                </div>
+            </div>
+
+            <div class="section-title">Experience</div>
+            
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title" id="p_job1_company">Tech Solutions Inc.</div>
+                    <div class="entry-location" id="p_job1_location">San Francisco, CA</div>
+                </div>
+                <div class="entry-sub-header">
+                    <div class="entry-role" id="p_job1_role">Product Manager Intern</div>
+                    <div class="entry-date" id="p_job1_date">June 2023 – Aug 2023</div>
+                </div>
+                <ul class="entry-list" id="p_job1_desc">
+                    <li>Spearheaded a new feature launch that increased user retention by 15% over 3 months.</li>
+                    <li>Collaborated with engineering and design teams to optimize the user onboarding flow.</li>
+                </ul>
+            </div>
+
+            <div class="entry">
+                <div class="entry-header">
+                    <div class="entry-title" id="p_job2_company">University Lab</div>
+                    <div class="entry-location" id="p_job2_location">Cambridge, MA</div>
+                </div>
+                <div class="entry-sub-header">
+                    <div class="entry-role" id="p_job2_role">Research Assistant</div>
+                    <div class="entry-date" id="p_job2_date">Sept 2022 – May 2023</div>
+                </div>
+                <ul class="entry-list" id="p_job2_desc">
+                    <li>Conducted data analysis using Python and Pandas on large datasets (1M+ rows).</li>
+                    <li>Assisted in the publication of a research paper on Machine Learning algorithms.</li>
+                </ul>
+            </div>
+
+            <div class="section-title">Skills & Interests</div>
+            <div class="skills-block" id="p_skills">
+                <span class="skill-category">Technical:</span> Python, JavaScript, HTML/CSS, SQL<br>
+                <span class="skill-category">Interests:</span> Marathon Running, Chess, Open Source
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- PRINT & REDIRECT ---
+    function handlePrint() {
+      window.print();
+      setTimeout(() => { window.location.href = 'success.html'; }, 1000);
+    }
+
+    function render() {
+        const getVal = (id) => document.getElementById(id).value;
+        const setTxt = (id, val, def) => {
+            const el = document.getElementById(id);
+            if(el) el.innerText = val || def;
+        };
+
+        setTxt('p_name', getVal('name'), 'JOHN DOE');
+        setTxt('p_phone', getVal('phone'), '555-123-4567');
+        setTxt('p_email', getVal('email'), 'john@harvard.edu');
+        setTxt('p_linkedin', getVal('linkedin'), 'linkedin.com/in/johndoe');
+        setTxt('p_location', getVal('location'), 'Cambridge, MA');
+
+        setTxt('p_edu_school', getVal('edu_school'), 'Harvard University');
+        setTxt('p_edu_location', getVal('edu_location'), 'Cambridge, MA');
+        setTxt('p_edu_degree', getVal('edu_degree'), 'Bachelor of Arts in Computer Science');
+        setTxt('p_edu_date', getVal('edu_date'), 'May 2024');
+
+        setTxt('p_job1_company', getVal('job1_company'), 'Tech Company');
+        setTxt('p_job1_location', getVal('job1_location'), 'City, State');
+        setTxt('p_job1_role', getVal('job1_role'), 'Intern');
+        setTxt('p_job1_date', getVal('job1_date'), 'Date Range');
+        
+        setTxt('p_job2_company', getVal('job2_company'), 'Research Lab');
+        setTxt('p_job2_location', getVal('job2_location'), 'City, State');
+        setTxt('p_job2_role', getVal('job2_role'), 'Assistant');
+        setTxt('p_job2_date', getVal('job2_date'), 'Date Range');
+
+        function textToBullets(inputId, containerId) {
+            const input = getVal(inputId);
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if(input.trim()) {
+                input.split('\n').forEach(line => {
+                    if(line.trim()) {
+                        const li = document.createElement('li');
+                        li.innerText = line.trim();
+                        container.appendChild(li);
+                    }
+                });
+            } else {
+                container.innerHTML = '<li>Accomplishment one goes here.</li><li>Accomplishment two goes here.</li>';
+            }
+        }
+        textToBullets('job1_desc', 'p_job1_desc');
+        textToBullets('job2_desc', 'p_job2_desc');
+
+        const skillsVal = getVal('skills');
+        const skillsContainer = document.getElementById('p_skills');
+        if(skillsVal.trim()) {
+            skillsContainer.innerHTML = skillsVal.replace(/\n/g, '<br>');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creative Editor | ResuMate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    /* --- DARK THEME VARIABLES --- */
+    :root {
+      /* UI Colors */
+      --bg-body: #050505;
+      --bg-panel: #121212;
+      --input-bg: #1e1e2e;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --accent: #f472b6; /* Creative Pink/Purple */
+
+      /* Paper Colors */
+      --paper-sidebar-bg: #2d2d2d;
+      --paper-sidebar-text: #f1f2f6;
+      --paper-accent: #ff4757; /* Coral Red for paper elements */
+      --paper-text-dark: #2f3542;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      background: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      height: 100vh;
+      overflow: hidden; 
+      color: var(--text-main);
+    }
+
+    @page { size: A4; margin: 0; }
+
+    /* --- LAYOUT --- */
+    .app-wrapper { display: flex; height: 100vh; width: 100vw; }
+
+    /* LEFT: EDITOR PANE */
+    .editor-pane {
+      width: 450px; 
+      min-width: 450px;
+      background: var(--bg-panel);
+      padding: 25px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+      z-index: 20;
+    }
+
+    /* Dark Mode Form Styling */
+    .form-section {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    /* Dark Mode Inputs */
+    .form-control {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: white;
+        font-size: 0.9rem;
+    }
+    .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--accent);
+        color: white;
+        box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.1);
+    }
+    .form-control::placeholder { color: #52525b; }
+    .form-text { color: var(--text-muted); }
+    
+    /* File Input Fix */
+    input[type="file"]::file-selector-button {
+      background-color: var(--accent);
+      color: black;
+      border: none;
+      padding: 5px 10px;
+      margin-right: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* RIGHT: PREVIEW PANE */
+    .preview-pane {
+      flex: 1;
+      background: #000000;
+      background-image: radial-gradient(#1a1b26 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    /* --- THE A4 PAPER (Creative Design) --- */
+    .resume-paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      display: flex;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      transform: scale(0.85);
+      transform-origin: top center;
+      font-family: 'Poppins', sans-serif;
+      color: var(--paper-text-dark);
+    }
+
+    /* LEFT SIDEBAR (Paper) */
+    .paper-left {
+      width: 35%;
+      background-color: var(--paper-sidebar-bg);
+      color: var(--paper-sidebar-text);
+      padding: 40px 25px;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* Photo Area */
+    .profile-img-container {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      border: 4px solid var(--paper-accent);
+      overflow: hidden;
+      margin-bottom: 30px;
+      background: #444;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .profile-placeholder { font-size: 3rem; color: #666; }
+
+    /* Sidebar Contact */
+    .contact-block { margin-bottom: 30px; text-align: left; width: 100%; }
+    .contact-item { font-size: 0.8rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .contact-item i { color: var(--paper-accent); }
+
+    .sidebar-header {
+      font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+      border-bottom: 2px solid var(--paper-accent);
+      padding-bottom: 5px; margin-bottom: 20px;
+      width: 100%; text-align: left; font-size: 0.9rem;
+    }
+
+    /* Skill Bars */
+    .skill-block { width: 100%; text-align: left; margin-bottom: 15px; }
+    .sb-label { font-size: 0.8rem; font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .sb-bg { width: 100%; height: 6px; background: #555; border-radius: 3px; overflow: hidden; }
+    .sb-fill { height: 100%; background: var(--paper-accent); width: 0%; transition: width 0.3s; }
+
+    /* RIGHT CONTENT (Paper) */
+    .paper-right { width: 65%; padding: 50px 40px; }
+
+    .name-block { margin-bottom: 40px; }
+    .name-text { font-size: 3rem; font-weight: 700; line-height: 1; text-transform: uppercase; color: var(--paper-sidebar-bg); }
+    .role-text { font-size: 1.2rem; color: var(--paper-accent); letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; font-weight: 600; }
+
+    .main-section { margin-bottom: 35px; }
+    .main-title {
+      font-size: 1.1rem; font-weight: 700; text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px; color: var(--paper-sidebar-bg);
+    }
+    .main-title span { background: var(--paper-accent); width: 30px; height: 3px; display: block; }
+
+    .entry { margin-bottom: 20px; position: relative; padding-left: 20px; border-left: 2px solid #eee; }
+    .entry::before {
+      content: ''; position: absolute; left: -6px; top: 0;
+      width: 10px; height: 10px; background: var(--paper-accent); border-radius: 50%;
+    }
+    .entry-title { font-weight: 700; font-size: 1rem; }
+    .entry-subtitle { font-size: 0.85rem; color: var(--paper-accent); font-weight: 600; text-transform: uppercase; }
+    .entry-date { font-size: 0.75rem; color: #999; margin-bottom: 5px; font-style: italic; }
+    .entry-desc { font-size: 0.85rem; line-height: 1.6; }
+
+    /* Responsive Scale */
+    @media (max-width: 1400px) { .resume-paper { transform: scale(0.75); margin-bottom: -150px; } }
+
+    /* Print Logic */
+    @media print {
+      body * { visibility: hidden; }
+      .resume-paper, .resume-paper * { visibility: visible; }
+      .resume-paper { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform: none !important; box-shadow: none; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+
+    .btn-back { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+    .btn-back:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  
+  <div class="editor-pane no-print">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+        <a href="index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Home</a>
+        <h5 class="fw-bold m-0 text-white">Creative<span style="color: var(--accent);">Mode</span></h5>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted small">Visual layout for designers</span>
+        <button onclick="handlePrint()" class="btn btn-light btn-sm fw-bold shadow-sm px-4 rounded-pill">
+          <i class="bi bi-download me-1"></i> Download
+        </button>
+    </div>
+
+    <form>
+      <div class="form-section">
+        <div class="section-title">Profile Photo</div>
+        <input type="file" class="form-control" id="photoInput" accept="image/*" onchange="loadPhoto(event)">
+        <div class="form-text small">Upload a professional square photo.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Header</div>
+        <input type="text" class="form-control mb-2" id="name" placeholder="Full Name" oninput="render()">
+        <input type="text" class="form-control" id="role" placeholder="Creative Role (e.g. UI Designer)" oninput="render()">
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Contact</div>
+        <input type="text" class="form-control mb-2" id="phone" placeholder="Phone" oninput="render()">
+        <input type="text" class="form-control mb-2" id="email" placeholder="Email" oninput="render()">
+        <input type="text" class="form-control mb-2" id="location" placeholder="City" oninput="render()">
+        <input type="text" class="form-control" id="portfolio" placeholder="Portfolio URL" oninput="render()">
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Visual Skills (0-100)</div>
+        <textarea class="form-control" id="skills" rows="4" placeholder="Figma:90, Photoshop:80, CSS:70 (Comma separated)" oninput="render()"></textarea>
+        <div class="form-text small">Format: "SkillName:Percentage"</div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">About Me</div>
+        <textarea class="form-control" id="summary" rows="3" placeholder="Creative bio..." oninput="render()"></textarea>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Experience</div>
+        <div class="mb-3 border-bottom border-secondary border-opacity-25 pb-3">
+          <input type="text" class="form-control mb-2" id="job1_title" placeholder="Job 1 Title" oninput="render()">
+          <input type="text" class="form-control mb-2" id="job1_comp" placeholder="Company" oninput="render()">
+          <input type="text" class="form-control mb-2" id="job1_date" placeholder="Date" oninput="render()">
+          <textarea class="form-control" id="job1_desc" rows="2" placeholder="Description..." oninput="render()"></textarea>
+        </div>
+        <div>
+          <input type="text" class="form-control mb-2" id="job2_title" placeholder="Job 2 Title" oninput="render()">
+          <input type="text" class="form-control mb-2" id="job2_comp" placeholder="Company" oninput="render()">
+          <input type="text" class="form-control mb-2" id="job2_date" placeholder="Date" oninput="render()">
+          <textarea class="form-control" id="job2_desc" rows="2" placeholder="Description..." oninput="render()"></textarea>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="preview-pane">
+    <div class="resume-paper">
+      
+      <div class="paper-left">
+        <div class="profile-img-container">
+          <img src="" id="p_img" class="profile-img">
+          <i class="bi bi-person-fill profile-placeholder" id="p_placeholder"></i>
+        </div>
+
+        <div class="contact-block">
+          <div class="sidebar-header">Contact</div>
+          <div class="contact-item"><i class="bi bi-telephone-fill"></i> <span id="p_phone">+1 234 567 890</span></div>
+          <div class="contact-item"><i class="bi bi-envelope-fill"></i> <span id="p_email">hello@design.com</span></div>
+          <div class="contact-item"><i class="bi bi-geo-alt-fill"></i> <span id="p_location">New York, USA</span></div>
+          <div class="contact-item"><i class="bi bi-globe"></i> <span id="p_portfolio">behance.net/user</span></div>
+        </div>
+
+        <div class="sidebar-header" style="margin-top: 20px;">Expertise</div>
+        <div id="p_skills_container" style="width: 100%;">
+          <div class="skill-block">
+            <div class="sb-label"><span>Photoshop</span><span>90%</span></div>
+            <div class="sb-bg"><div class="sb-fill" style="width: 90%;"></div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="paper-right">
+        
+        <div class="name-block">
+          <div class="name-text" id="p_name">Alex Design</div>
+          <div class="role-text" id="p_role">Product Designer</div>
+        </div>
+
+        <div class="main-section">
+          <div class="main-title"><span></span>Profile</div>
+          <div class="entry-desc" id="p_summary">
+            Passionate UI/UX Designer with a focus on clean, user-centric interfaces. Experienced in translating complex requirements into intuitive and visually appealing designs.
+          </div>
+        </div>
+
+        <div class="main-section">
+          <div class="main-title"><span></span>Experience</div>
+          
+          <div class="entry">
+            <div class="entry-title" id="p_job1_title">Senior Designer</div>
+            <div class="entry-subtitle" id="p_job1_comp">Creative Agency</div>
+            <div class="entry-date" id="p_job1_date">2021 - Present</div>
+            <div class="entry-desc" id="p_job1_desc">
+              Led the redesign of the main e-commerce platform aimed at increasing conversion rates. Managed a team of 3 junior designers.
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-title" id="p_job2_title">UI Developer</div>
+            <div class="entry-subtitle" id="p_job2_comp">Tech StartUp</div>
+            <div class="entry-date" id="p_job2_date">2019 - 2021</div>
+            <div class="entry-desc" id="p_job2_desc">
+              Collaborated with developers to implement responsive designs. Created a unified design system used across 5 different products.
+            </div>
+          </div>
+        </div>
+
+        <div class="main-section">
+            <div class="main-title"><span></span>Education</div>
+            <div class="entry">
+              <div class="entry-title">Bachelor of Arts</div>
+              <div class="entry-subtitle">Design University</div>
+              <div class="entry-date">2019</div>
+            </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- PRINT & REDIRECT ---
+  function handlePrint() {
+    window.print();
+    setTimeout(() => { window.location.href = 'success.html'; }, 1000);
+  }
+
+  function render() {
+    const getVal = (id) => document.getElementById(id).value;
+    const setTxt = (id, val, def) => {
+      const el = document.getElementById(id);
+      if(el) el.innerText = val || def;
+    };
+
+    setTxt('p_name', getVal('name'), 'ALEX DESIGN');
+    setTxt('p_role', getVal('role'), 'PRODUCT DESIGNER');
+    setTxt('p_phone', getVal('phone'), '+1 234 567 890');
+    setTxt('p_email', getVal('email'), 'alex@design.com');
+    setTxt('p_location', getVal('location'), 'New York, USA');
+    setTxt('p_portfolio', getVal('portfolio'), 'behance.net/alex');
+    setTxt('p_summary', getVal('summary'), 'Passionate UI/UX Designer...');
+
+    setTxt('p_job1_title', getVal('job1_title'), 'Senior Designer');
+    setTxt('p_job1_comp', getVal('job1_comp'), 'Agency Co.');
+    setTxt('p_job1_date', getVal('job1_date'), '2021 - Present');
+    setTxt('p_job1_desc', getVal('job1_desc'), 'Description...');
+
+    setTxt('p_job2_title', getVal('job2_title'), 'Junior Designer');
+    setTxt('p_job2_comp', getVal('job2_comp'), 'Startup Inc.');
+    setTxt('p_job2_date', getVal('job2_date'), '2019 - 2020');
+    setTxt('p_job2_desc', getVal('job2_desc'), 'Description...');
+
+    // LOGIC: Render Skill Bars (Format: "Skill:80, Skill:50")
+    const skillsInput = getVal('skills');
+    const container = document.getElementById('p_skills_container');
+    
+    if(skillsInput.trim()) {
+      container.innerHTML = '';
+      skillsInput.split(',').forEach(item => {
+        if(item.includes(':')) {
+          const [name, score] = item.split(':');
+          const cleanScore = parseInt(score.trim());
+          const html = `
+            <div class="skill-block">
+              <div class="sb-label"><span>${name.trim()}</span><span>${cleanScore}%</span></div>
+              <div class="sb-bg"><div class="sb-fill" style="width: ${cleanScore}%;"></div></div>
+            </div>
+          `;
+          container.innerHTML += html;
+        }
+      });
+    }
+  }
+
+  // LOGIC: Image Upload
+  function loadPhoto(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      const img = document.getElementById('p_img');
+      const icon = document.getElementById('p_placeholder');
+      
+      img.src = url;
+      img.style.display = 'block';
+      icon.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>
