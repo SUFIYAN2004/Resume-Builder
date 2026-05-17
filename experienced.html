@@ -1,491 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Senior Editor | ResuMate</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Senior Editor | ResuMate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+:root {
+  --bg-body: #050505;
+  --bg-panel: #121212;
+  --input-bg: #1e1e2e;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-main: #ffffff;
+  --text-muted: #a1a1aa;
+  --accent: #10b981;
+  --paper-sidebar-bg: #111827;
+  --paper-sidebar-text: #f3f4f6;
+  --paper-accent: #059669;
+  --paper-text-main: #374151;
+}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+* { box-sizing: border-box; }
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+body {
+  background: var(--bg-body);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--text-main);
+}
 
-  <style>
-    /* --- DARK THEME VARIABLES --- */
-    :root {
-      /* UI Colors */
-      --bg-body: #050505;
-      --bg-panel: #121212;
-      --input-bg: #1e1e2e;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --text-main: #ffffff;
-      --text-muted: #a1a1aa;
-      --accent: #10b981; /* Professional Green */
+.app-wrapper { display: flex; height: 100vh; width: 100vw; }
 
-      /* Paper Colors (Internal Resume) */
-      --paper-sidebar-bg: #111827; 
-      --paper-sidebar-text: #f3f4f6;
-      --paper-accent: #059669; /* Darker Emerald for paper */
-      --paper-text-main: #374151;
-    }
+.editor-pane {
+  width: 460px;
+  min-width: 460px;
+  background: var(--bg-panel);
+  padding: 25px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  z-index: 20;
+}
 
-    * { box-sizing: border-box; }
-    
-    body {
-      background: var(--bg-body);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      height: 100vh;
-      overflow: hidden; 
-      color: var(--text-main);
-    }
+.form-section {
+  background: rgba(255,255,255,0.03);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 1px solid var(--border-color);
+}
 
-    @page { size: A4; margin: 0; }
+.section-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
 
-    /* --- LAYOUT --- */
-    .app-wrapper { display: flex; height: 100vh; width: 100vw; }
+.form-control {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: white;
+  font-size: 0.9rem;
+}
+.form-control:focus {
+  background-color: var(--input-bg);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+.form-control::placeholder { color: #52525b; }
+label.small { color: var(--text-muted) !important; margin-bottom: 5px; display: block; }
 
-    /* LEFT: EDITOR PANE (Dark Mode) */
-    .editor-pane {
-      width: 460px; 
-      min-width: 460px;
-      background: var(--bg-panel);
-      padding: 25px;
-      overflow-y: auto;
-      border-right: 1px solid var(--border-color);
-      z-index: 20;
-    }
+.preview-pane {
+  flex: 1;
+  background: #000000;
+  background-image: radial-gradient(#1a1b26 1px, transparent 1px);
+  background-size: 20px 20px;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
 
-    /* Dark Mode Form Styling */
-    .form-section {
-      background: rgba(255,255,255,0.03);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .section-header {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 15px;
-      letter-spacing: 1px;
-    }
+.resume-paper {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  color: #333;
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  transform: scale(0.85);
+  transform-origin: top center;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
-    /* Dark Mode Inputs */
-    .form-control {
-        background-color: var(--input-bg);
-        border: 1px solid var(--border-color);
-        color: white;
-        font-size: 0.9rem;
-    }
-    .form-control:focus {
-        background-color: var(--input-bg);
-        border-color: var(--accent);
-        color: white;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-    }
-    .form-control::placeholder { color: #52525b; }
-    label.small { color: var(--text-muted) !important; margin-bottom: 5px; display: block; }
+@media (max-width: 1400px) { .resume-paper { transform: scale(0.75); margin-bottom: -150px; } }
 
-    /* RIGHT: PREVIEW PANE */
-    .preview-pane {
-      flex: 1;
-      background: #000000;
-      background-image: radial-gradient(#1a1b26 1px, transparent 1px);
-      background-size: 20px 20px;
-      display: flex;
-      justify-content: center;
-      padding: 40px;
-      overflow-y: auto;
-    }
+.paper-sidebar {
+  width: 32%;
+  background-color: var(--paper-sidebar-bg);
+  color: var(--paper-sidebar-text);
+  padding: 40px 25px;
+  text-align: left;
+  display: flex; flex-direction: column;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
-    /* --- THE A4 PAPER (WHITE) --- */
-    .resume-paper {
-      width: 210mm;
-      min-height: 297mm;
-      background: white;
-      color: #333;
-      font-family: 'Open Sans', sans-serif;
-      display: flex;
-      box-shadow: 0 0 50px rgba(0,0,0,0.5);
-      transform: scale(0.85);
-      transform-origin: top center;
-    }
+.sidebar-title {
+  font-family: 'Roboto Slab', serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
+  color: var(--paper-accent); margin-top: 35px; margin-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 5px;
+}
 
-    /* Responsive Scale */
-    @media (max-width: 1400px) { .resume-paper { transform: scale(0.75); margin-bottom: -150px; } }
+.info-item { font-size: 0.8rem; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; color: #d1d5db; word-break: break-all; }
+.info-item i { color: var(--paper-accent); min-width: 15px; }
 
-    /* --- RESUME INTERNAL STYLING --- */
-    .paper-sidebar {
-      width: 32%;
-      background-color: var(--paper-sidebar-bg);
-      color: var(--paper-sidebar-text);
-      padding: 40px 25px;
-      text-align: left;
-      display: flex; flex-direction: column;
-    }
-    .sidebar-title {
-      font-family: 'Roboto Slab', serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
-      color: var(--paper-accent); margin-top: 35px; margin-bottom: 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 5px;
-    }
-    .info-item { font-size: 0.8rem; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; color: #d1d5db; word-break: break-all; }
-    .info-item i { color: var(--paper-accent); min-width: 15px; }
-    
-    .edu-block-sidebar { margin-bottom: 20px; }
-    .edu-degree { font-weight: 700; font-size: 0.9rem; color: white; line-height: 1.2; }
-    .edu-school { font-size: 0.8rem; color: #9ca3af; margin-top: 3px; }
-    .edu-year { font-size: 0.75rem; color: var(--paper-accent); font-style: italic; margin-top: 2px; }
-    
-    .sidebar-list { font-size: 0.85rem; padding-left: 0; list-style: none; color: #e5e7eb; }
-    .sidebar-list li { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+.edu-block-sidebar { margin-bottom: 20px; }
+.edu-degree { font-weight: 700; font-size: 0.9rem; color: white; line-height: 1.2; }
+.edu-school { font-size: 0.8rem; color: #9ca3af; margin-top: 3px; }
+.edu-year { font-size: 0.75rem; color: var(--paper-accent); font-style: italic; margin-top: 2px; }
 
-    .paper-main { width: 68%; padding: 50px 40px; color: var(--paper-text-main); display: flex; flex-direction: column; }
-    .main-header-name { font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 2.6rem; text-transform: uppercase; line-height: 1; color: #111827; }
-    .main-header-role { font-weight: 700; font-size: 1.2rem; color: var(--paper-accent); margin-top: 8px; letter-spacing: 1px; text-transform: uppercase; }
-    
-    .main-title {
-      font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 1.1rem; text-transform: uppercase;
-      color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; margin-top: 35px; margin-bottom: 20px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .main-title i { color: var(--paper-accent); font-size: 1rem; }
+.sidebar-list { font-size: 0.85rem; padding-left: 0; list-style: none; color: #e5e7eb; }
+.sidebar-list li { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
 
-    .expertise-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-    .expertise-item {
-        background: #f3f4f6; border: 1px solid #e5e7eb; color: #374151;
-        padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
-    }
+.paper-main { width: 68%; padding: 50px 40px; color: var(--paper-text-main); display: flex; flex-direction: column; }
 
-    .job-block { margin-bottom: 30px; }
-    .job-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
-    .job-role { font-weight: 800; font-size: 1.05rem; color: #1f2937; }
-    .job-company { font-weight: 700; font-size: 0.95rem; color: var(--paper-accent); }
-    .job-date { font-size: 0.85rem; color: #6b7280; font-weight: 600; white-space: nowrap; }
-    .job-desc { font-size: 0.9rem; line-height: 1.6; color: #4b5563; margin-top: 8px; text-align: justify; }
+.main-header-name { font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 2.6rem; text-transform: uppercase; line-height: 1; color: #111827; }
+.main-header-role { font-weight: 700; font-size: 1.2rem; color: var(--paper-accent); margin-top: 8px; letter-spacing: 1px; text-transform: uppercase; }
 
-    /* --- PRINT SETTINGS --- */
-    @media print {
-      body * { visibility: hidden; } 
-      .resume-paper, .resume-paper * { visibility: visible; } 
-      .resume-paper { position: absolute; left: 0; top: 0; margin: 0; padding: 0; width: 100%; height: 100%; box-shadow: none; transform: none !important; }
-      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    }
+.main-title {
+  font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 1.1rem; text-transform: uppercase;
+  color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; margin-top: 35px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.main-title i { color: var(--paper-accent); font-size: 1rem; }
 
-    .btn-back { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
-    .btn-back:hover { color: white; }
-  </style>
+.expertise-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.expertise-item {
+  background: #f3f4f6; border: 1px solid #e5e7eb; color: #374151;
+  padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+}
+
+.job-block { margin-bottom: 30px; }
+.job-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+.job-role { font-weight: 800; font-size: 1.05rem; color: #1f2937; }
+.job-company { font-weight: 700; font-size: 0.95rem; color: var(--paper-accent); }
+.job-date { font-size: 0.85rem; color: #6b7280; font-weight: 600; white-space: nowrap; }
+.job-desc { font-size: 0.9rem; line-height: 1.6; color: #4b5563; margin-top: 8px; text-align: justify; }
+
+/* ===== FIXED PRINT STYLES ===== */
+@media print {
+  .editor-pane,
+  .preview-pane {
+    display: none !important;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  .app-wrapper {
+    display: block !important;
+  }
+
+  .resume-paper {
+    display: flex !important;
+    position: static !important;
+    transform: none !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .paper-sidebar {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #111827 !important;
+    color: #f3f4f6 !important;
+  }
+
+  @page { size: A4; margin: 0; }
+}
+
+.btn-back { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+.btn-back:hover { color: white; }
+</style>
 </head>
 <body>
+<div class="app-wrapper">
 
-  <div class="app-wrapper">
-    
-    <div class="editor-pane no-print">
-      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-        <a href="index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Home</a>
-        <h5 class="fw-bold m-0 text-white">Senior<span class="text-success">Mode</span></h5>
-      </div>
-
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <span class="text-muted small">Fill details to generate</span>
-        <button onclick="handlePrint()" class="btn btn-success btn-sm fw-bold shadow-sm px-4 rounded-pill">
-          <i class="bi bi-download me-1"></i> Download
-        </button>
-      </div>
-
-      <form id="resumeForm">
-        
-        <div class="form-section">
-          <div class="section-header">Header Info</div>
-          <input type="text" class="form-control form-control-sm mb-2" id="name" placeholder="Full Name" oninput="update()">
-          <input type="text" class="form-control form-control-sm mb-2" id="role" placeholder="Current Title" oninput="update()">
-          <textarea class="form-control form-control-sm" id="summary" rows="4" placeholder="Executive Profile..." oninput="update()"></textarea>
-        </div>
-
-        <div class="form-section">
-            <div class="section-header">Contact</div>
-            <input type="text" class="form-control form-control-sm mb-2" id="phone" placeholder="Phone" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-2" id="email" placeholder="Email" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-2" id="location" placeholder="City" oninput="update()">
-            <input type="text" class="form-control form-control-sm" id="linkedin" placeholder="LinkedIn" oninput="update()">
-        </div>
-
-        <div class="form-section">
-            <div class="section-header">Areas of Expertise</div>
-            <textarea class="form-control form-control-sm" id="expertise" rows="3" placeholder="Strategic Planning, Agile, Budgeting (Comma separated)" oninput="update()"></textarea>
-            <div class="form-text small text-muted">Creates a skill grid below the summary.</div>
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">Work Experience</div>
-          
-          <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-            <label class="fw-bold text-success mb-2 small">Role 1 (Latest)</label>
-            <input type="text" class="form-control form-control-sm mb-1" id="job1_role" placeholder="Role" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-1" id="job1_company" placeholder="Company" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-2" id="job1_date" placeholder="Date" oninput="update()">
-            <textarea class="form-control form-control-sm" id="job1_desc" rows="4" placeholder="Key responsibilities (use bullets)..." oninput="update()"></textarea>
-          </div>
-
-          <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-            <label class="fw-bold text-muted mb-2 small">Role 2</label>
-            <input type="text" class="form-control form-control-sm mb-1" id="job2_role" placeholder="Role" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-1" id="job2_company" placeholder="Company" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-2" id="job2_date" placeholder="Date" oninput="update()">
-            <textarea class="form-control form-control-sm" id="job2_desc" rows="3" placeholder="Responsibilities..." oninput="update()"></textarea>
-          </div>
-
-          <div>
-            <label class="fw-bold text-muted mb-2 small">Role 3</label>
-            <input type="text" class="form-control form-control-sm mb-1" id="job3_role" placeholder="Role" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-1" id="job3_company" placeholder="Company" oninput="update()">
-            <input type="text" class="form-control form-control-sm mb-2" id="job3_date" placeholder="Date" oninput="update()">
-            <textarea class="form-control form-control-sm" id="job3_desc" rows="3" placeholder="Responsibilities..." oninput="update()"></textarea>
-          </div>
-        </div>
-
-        <div class="form-section">
-            <div class="section-header">Professional Development</div>
-            <textarea class="form-control form-control-sm" id="profdev" rows="3" placeholder="• Certified Scrum Master&#10;• Leadership Summit" oninput="update()"></textarea>
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">Sidebar Details</div>
-          
-          <label class="small text-muted fw-bold">Education</label>
-          <input type="text" class="form-control form-control-sm mb-1" id="edu_degree" placeholder="Degree" oninput="update()">
-          <input type="text" class="form-control form-control-sm mb-1" id="edu_school" placeholder="University" oninput="update()">
-          <input type="text" class="form-control form-control-sm mb-3" id="edu_year" placeholder="Year" oninput="update()">
-
-          <label class="small text-muted fw-bold">Certifications (One per line)</label>
-          <textarea class="form-control form-control-sm mb-3" id="certs" rows="3" placeholder="Certs..." oninput="update()"></textarea>
-          
-          <label class="small text-muted fw-bold">Awards (One per line)</label>
-          <textarea class="form-control form-control-sm mb-3" id="awards" rows="2" placeholder="Awards..." oninput="update()"></textarea>
-          
-          <label class="small text-muted fw-bold">Languages (Comma separated)</label>
-          <input type="text" class="form-control form-control-sm" id="languages" placeholder="English, Spanish..." oninput="update()">
-        </div>
-
-      </form>
+  <div class="editor-pane">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+      <a href="index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Home</a>
+      <h5 class="fw-bold m-0 text-white">Senior<span class="text-success">Mode</span></h5>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <span class="text-muted small">Fill details to generate</span>
+      <button onclick="handlePrint()" class="btn btn-success btn-sm fw-bold shadow-sm px-4 rounded-pill">
+        <i class="bi bi-download me-1"></i> Download
+      </button>
     </div>
 
-    <div class="preview-pane">
-      <div class="resume-paper">
-        
-        <div class="paper-sidebar">
-          
-          <div class="sidebar-title" style="margin-top: 0;">Contact</div>
-          <div class="info-item"><i class="bi bi-telephone-fill"></i> <span id="p_phone">+91 98765 43210</span></div>
-          <div class="info-item"><i class="bi bi-envelope-fill"></i> <span id="p_email">email@domain.com</span></div>
-          <div class="info-item"><i class="bi bi-geo-alt-fill"></i> <span id="p_location">City, Country</span></div>
-          <div class="info-item"><i class="bi bi-linkedin"></i> <span id="p_linkedin">linkedin.com/in/me</span></div>
+    <form id="resumeForm">
+      <div class="form-section">
+        <div class="section-header">Header Info</div>
+        <input type="text" class="form-control form-control-sm mb-2" id="name" placeholder="Full Name" oninput="update()">
+        <input type="text" class="form-control form-control-sm mb-2" id="role" placeholder="Current Title" oninput="update()">
+        <textarea class="form-control form-control-sm" id="summary" rows="4" placeholder="Executive Profile..." oninput="update()"></textarea>
+      </div>
 
-          <div class="sidebar-title">Education</div>
-          <div class="edu-block-sidebar">
-            <div class="edu-degree" id="p_edu_degree">Master of Business Administration</div>
-            <div class="edu-school" id="p_edu_school">Harvard University</div>
-            <div class="edu-year" id="p_edu_year">2018</div>
-          </div>
+      <div class="form-section">
+        <div class="section-header">Contact</div>
+        <input type="text" class="form-control form-control-sm mb-2" id="phone" placeholder="Phone" oninput="update()">
+        <input type="text" class="form-control form-control-sm mb-2" id="email" placeholder="Email" oninput="update()">
+        <input type="text" class="form-control form-control-sm mb-2" id="location" placeholder="City" oninput="update()">
+        <input type="text" class="form-control form-control-sm" id="linkedin" placeholder="LinkedIn" oninput="update()">
+      </div>
 
-          <div class="sidebar-title">Certifications</div>
-          <ul class="sidebar-list" id="p_certs">
-            <li>PMP Certified Project Manager</li>
-            <li>AWS Solutions Architect</li>
-          </ul>
+      <div class="form-section">
+        <div class="section-header">Areas of Expertise</div>
+        <textarea class="form-control form-control-sm" id="expertise" rows="3" placeholder="Strategic Planning, Agile, Budgeting (Comma separated)" oninput="update()"></textarea>
+        <div class="form-text small text-muted">Creates a skill grid below the summary.</div>
+      </div>
 
-          <div class="sidebar-title">Awards</div>
-          <ul class="sidebar-list" id="p_awards">
-            <li>Employee of the Year 2022</li>
-            <li>Best Leadership Award</li>
-          </ul>
+      <div class="form-section">
+        <div class="section-header">Work Experience</div>
+        <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+          <label class="fw-bold text-success mb-2 small">Role 1 (Latest)</label>
+          <input type="text" class="form-control form-control-sm mb-1" id="job1_role" placeholder="Role" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-1" id="job1_company" placeholder="Company" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="job1_date" placeholder="Date" oninput="update()">
+          <textarea class="form-control form-control-sm" id="job1_desc" rows="4" placeholder="Key responsibilities (use bullets)..." oninput="update()"></textarea>
+        </div>
+        <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+          <label class="fw-bold text-muted mb-2 small">Role 2</label>
+          <input type="text" class="form-control form-control-sm mb-1" id="job2_role" placeholder="Role" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-1" id="job2_company" placeholder="Company" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="job2_date" placeholder="Date" oninput="update()">
+          <textarea class="form-control form-control-sm" id="job2_desc" rows="3" placeholder="Responsibilities..." oninput="update()"></textarea>
+        </div>
+        <div>
+          <label class="fw-bold text-muted mb-2 small">Role 3</label>
+          <input type="text" class="form-control form-control-sm mb-1" id="job3_role" placeholder="Role" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-1" id="job3_company" placeholder="Company" oninput="update()">
+          <input type="text" class="form-control form-control-sm mb-2" id="job3_date" placeholder="Date" oninput="update()">
+          <textarea class="form-control form-control-sm" id="job3_desc" rows="3" placeholder="Responsibilities..." oninput="update()"></textarea>
+        </div>
+      </div>
 
-          <div class="sidebar-title">Languages</div>
-          <ul class="sidebar-list" id="p_languages">
-             <li>English</li>
-             <li>French</li>
-          </ul>
+      <div class="form-section">
+        <div class="section-header">Professional Development</div>
+        <textarea class="form-control form-control-sm" id="profdev" rows="3" placeholder="• Certified Scrum Master&#10;• Leadership Summit" oninput="update()"></textarea>
+      </div>
 
+      <div class="form-section">
+        <div class="section-header">Sidebar Details</div>
+        <label class="small text-muted fw-bold">Education</label>
+        <input type="text" class="form-control form-control-sm mb-1" id="edu_degree" placeholder="Degree" oninput="update()">
+        <input type="text" class="form-control form-control-sm mb-1" id="edu_school" placeholder="University" oninput="update()">
+        <input type="text" class="form-control form-control-sm mb-3" id="edu_year" placeholder="Year" oninput="update()">
+        <label class="small text-muted fw-bold">Certifications (One per line)</label>
+        <textarea class="form-control form-control-sm mb-3" id="certs" rows="3" placeholder="Certs..." oninput="update()"></textarea>
+        <label class="small text-muted fw-bold">Awards (One per line)</label>
+        <textarea class="form-control form-control-sm mb-3" id="awards" rows="2" placeholder="Awards..." oninput="update()"></textarea>
+        <label class="small text-muted fw-bold">Languages (Comma separated)</label>
+        <input type="text" class="form-control form-control-sm" id="languages" placeholder="English, Spanish..." oninput="update()">
+      </div>
+    </form>
+  </div>
+
+  <div class="preview-pane">
+    <div class="resume-paper">
+      <div class="paper-sidebar">
+        <div class="sidebar-title" style="margin-top: 0;">Contact</div>
+        <div class="info-item"><i class="bi bi-telephone-fill"></i> <span id="p_phone">+91 98765 43210</span></div>
+        <div class="info-item"><i class="bi bi-envelope-fill"></i> <span id="p_email">email@domain.com</span></div>
+        <div class="info-item"><i class="bi bi-geo-alt-fill"></i> <span id="p_location">City, Country</span></div>
+        <div class="info-item"><i class="bi bi-linkedin"></i> <span id="p_linkedin">linkedin.com/in/me</span></div>
+
+        <div class="sidebar-title">Education</div>
+        <div class="edu-block-sidebar">
+          <div class="edu-degree" id="p_edu_degree">Master of Business Administration</div>
+          <div class="edu-school" id="p_edu_school">Harvard University</div>
+          <div class="edu-year" id="p_edu_year">2018</div>
         </div>
 
-        <div class="paper-main">
-          
-          <div class="mb-4">
-            <h1 class="main-header-name" id="p_name">Your Name</h1>
-            <div class="main-header-role" id="p_role">Senior Product Manager</div>
+        <div class="sidebar-title">Certifications</div>
+        <ul class="sidebar-list" id="p_certs">
+          <li>PMP Certified Project Manager</li>
+          <li>AWS Solutions Architect</li>
+        </ul>
+
+        <div class="sidebar-title">Awards</div>
+        <ul class="sidebar-list" id="p_awards">
+          <li>Employee of the Year 2022</li>
+          <li>Best Leadership Award</li>
+        </ul>
+
+        <div class="sidebar-title">Languages</div>
+        <ul class="sidebar-list" id="p_languages">
+          <li>English</li>
+          <li>French</li>
+        </ul>
+      </div>
+
+      <div class="paper-main">
+        <div class="mb-4">
+          <h1 class="main-header-name" id="p_name">Your Name</h1>
+          <div class="main-header-role" id="p_role">Senior Product Manager</div>
+        </div>
+
+        <div class="mb-4">
+          <div class="main-title" style="margin-top: 0;"><i class="bi bi-person-lines-fill"></i> Executive Profile</div>
+          <div class="job-desc" id="p_summary">Results-oriented professional with 10+ years of experience driving product lifecycle management. Expert in Agile methodologies and strategic planning.</div>
+        </div>
+
+        <div class="mb-4">
+          <div class="main-title"><i class="bi bi-grid-3x3-gap-fill"></i> Areas of Expertise</div>
+          <div class="expertise-grid" id="p_expertise">
+            <span class="expertise-item">Strategic Planning</span>
+            <span class="expertise-item">Team Leadership</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="main-title"><i class="bi bi-briefcase-fill"></i> Professional Experience</div>
+          <div class="job-block">
+            <div class="job-header">
+              <div class="job-role" id="p_job1_role">Senior Manager</div>
+              <div class="job-date" id="p_job1_date">2021 - Present</div>
+            </div>
+            <div class="job-company" id="p_job1_company">Tech Solutions Inc.</div>
+            <div class="job-desc" id="p_job1_desc">• Directed a team of 20+ professionals in delivering enterprise solutions.<br>• Increased operational efficiency by 25% through process optimization.</div>
           </div>
 
-          <div class="mb-4">
-            <div class="main-title" style="margin-top: 0;"><i class="bi bi-person-lines-fill"></i> Executive Profile</div>
-            <div class="job-desc" id="p_summary">
-              Results-oriented professional with 10+ years of experience in driving product lifecycle management. Expert in Agile methodologies and strategic planning.
+          <div class="job-block">
+            <div class="job-header">
+              <div class="job-role" id="p_job2_role">Product Owner</div>
+              <div class="job-date" id="p_job2_date">2018 - 2021</div>
             </div>
+            <div class="job-company" id="p_job2_company">Creative Agency</div>
+            <div class="job-desc" id="p_job2_desc">• Spearheaded the launch of 3 major products, resulting in $500k revenue.</div>
           </div>
 
-          <div class="mb-4">
-             <div class="main-title"><i class="bi bi-grid-3x3-gap-fill"></i> Areas of Expertise</div>
-             <div class="expertise-grid" id="p_expertise">
-                 <span class="expertise-item">Strategic Planning</span>
-                 <span class="expertise-item">Team Leadership</span>
-             </div>
+          <div class="job-block">
+            <div class="job-header">
+              <div class="job-role" id="p_job3_role">Business Analyst</div>
+              <div class="job-date" id="p_job3_date">2015 - 2018</div>
+            </div>
+            <div class="job-company" id="p_job3_company">StartUp Hub</div>
+            <div class="job-desc" id="p_job3_desc">• Conducted comprehensive market research and competitor analysis.</div>
           </div>
+        </div>
 
-          <div>
-            <div class="main-title"><i class="bi bi-briefcase-fill"></i> Professional Experience</div>
-            
-            <div class="job-block">
-                <div class="job-header">
-                    <div class="job-role" id="p_job1_role">Senior Manager</div>
-                    <div class="job-date" id="p_job1_date">2021 - Present</div>
-                </div>
-                <div class="job-company" id="p_job1_company">Tech Solutions Inc.</div>
-                <div class="job-desc" id="p_job1_desc">
-                    • Directed a team of 20+ professionals in delivering enterprise solutions.<br>
-                    • Increased operational efficiency by 25% through process optimization.
-                </div>
-            </div>
-
-            <div class="job-block">
-                <div class="job-header">
-                    <div class="job-role" id="p_job2_role">Product Owner</div>
-                    <div class="job-date" id="p_job2_date">2018 - 2021</div>
-                </div>
-                <div class="job-company" id="p_job2_company">Creative Agency</div>
-                <div class="job-desc" id="p_job2_desc">
-                    • Spearheaded the launch of 3 major products, resulting in $500k revenue.
-                </div>
-            </div>
-
-            <div class="job-block">
-                <div class="job-header">
-                    <div class="job-role" id="p_job3_role">Business Analyst</div>
-                    <div class="job-date" id="p_job3_date">2015 - 2018</div>
-                </div>
-                <div class="job-company" id="p_job3_company">StartUp Hub</div>
-                <div class="job-desc" id="p_job3_desc">
-                    • Conducted comprehensive market research and competitor analysis.
-                </div>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <div class="main-title"><i class="bi bi-journal-bookmark-fill"></i> Professional Development</div>
-            <div class="job-desc" id="p_profdev">
-                • Advanced Leadership Workshop - 2023
-            </div>
-          </div>
-
+        <div class="mb-4">
+          <div class="main-title"><i class="bi bi-journal-bookmark-fill"></i> Professional Development</div>
+          <div class="job-desc" id="p_profdev">• Advanced Leadership Workshop - 2023</div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    // --- PRINT & REDIRECT ---
-    function handlePrint() {
-      window.print();
-      setTimeout(() => { window.location.href = 'success.html'; }, 1000);
+<script>
+  // FIXED: use onafterprint instead of setTimeout
+  function handlePrint() {
+    window.onafterprint = function () {
+      window.onafterprint = null;
+      window.location.href = 'success.html';
+    };
+    window.print();
+  }
+
+  function update() {
+    const getVal = (id) => document.getElementById(id).value;
+    const setTxt = (id, val, def) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = val || def;
+    };
+
+    setTxt('p_name', getVal('name'), 'YOUR NAME');
+    setTxt('p_role', getVal('role'), 'SENIOR JOB TITLE');
+    setTxt('p_summary', getVal('summary'), 'Results-oriented professional...');
+    setTxt('p_phone', getVal('phone'), '+91 98765 43210');
+    setTxt('p_email', getVal('email'), 'email@domain.com');
+    setTxt('p_location', getVal('location'), 'City, Country');
+    setTxt('p_linkedin', getVal('linkedin'), 'linkedin.com/in/me');
+    setTxt('p_edu_degree', getVal('edu_degree'), 'Master of Business');
+    setTxt('p_edu_school', getVal('edu_school'), 'University');
+    setTxt('p_edu_year', getVal('edu_year'), 'Year');
+    setTxt('p_job1_role', getVal('job1_role'), 'Senior Role');
+    setTxt('p_job1_company', getVal('job1_company'), 'Company');
+    setTxt('p_job1_date', getVal('job1_date'), 'Date');
+    setTxt('p_job2_role', getVal('job2_role'), 'Mid Role');
+    setTxt('p_job2_company', getVal('job2_company'), 'Company');
+    setTxt('p_job2_date', getVal('job2_date'), 'Date');
+    setTxt('p_job3_role', getVal('job3_role'), 'Junior Role');
+    setTxt('p_job3_company', getVal('job3_company'), 'Company');
+    setTxt('p_job3_date', getVal('job3_date'), 'Date');
+
+    function textToBullets(inputId, containerId) {
+      const input = getVal(inputId);
+      const container = document.getElementById(containerId);
+      if (input.trim()) {
+        container.innerHTML = '• ' + input.replace(/\n/g, '<br>• ');
+      }
     }
+    textToBullets('job1_desc', 'p_job1_desc');
+    textToBullets('job2_desc', 'p_job2_desc');
+    textToBullets('job3_desc', 'p_job3_desc');
+    textToBullets('profdev', 'p_profdev');
 
-    function update() {
-      const getVal = (id) => document.getElementById(id).value;
-      const setTxt = (id, val, def) => {
-        const el = document.getElementById(id);
-        if(el) el.innerText = val || def;
-      };
-
-      setTxt('p_name', getVal('name'), 'YOUR NAME');
-      setTxt('p_role', getVal('role'), 'SENIOR JOB TITLE');
-      setTxt('p_summary', getVal('summary'), 'Results-oriented professional...');
-      
-      setTxt('p_phone', getVal('phone'), '+91 98765 43210');
-      setTxt('p_email', getVal('email'), 'email@domain.com');
-      setTxt('p_location', getVal('location'), 'City, Country');
-      setTxt('p_linkedin', getVal('linkedin'), 'linkedin.com/in/me');
-
-      setTxt('p_edu_degree', getVal('edu_degree'), 'Master of Business');
-      setTxt('p_edu_school', getVal('edu_school'), 'University');
-      setTxt('p_edu_year', getVal('edu_year'), 'Year');
-
-      setTxt('p_job1_role', getVal('job1_role'), 'Senior Role');
-      setTxt('p_job1_company', getVal('job1_company'), 'Company');
-      setTxt('p_job1_date', getVal('job1_date'), 'Date');
-      
-      setTxt('p_job2_role', getVal('job2_role'), 'Mid Role');
-      setTxt('p_job2_company', getVal('job2_company'), 'Company');
-      setTxt('p_job2_date', getVal('job2_date'), 'Date');
-
-      setTxt('p_job3_role', getVal('job3_role'), 'Junior Role');
-      setTxt('p_job3_company', getVal('job3_company'), 'Company');
-      setTxt('p_job3_date', getVal('job3_date'), 'Date');
-
-      function textToBullets(inputId, containerId) {
-          const input = getVal(inputId);
-          const container = document.getElementById(containerId);
-          if(input.trim()) {
-             container.innerHTML = '• ' + input.replace(/\n/g, '<br>• ');
+    function textToList(inputId, containerId) {
+      const input = getVal(inputId);
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (input.trim()) {
+        input.split('\n').forEach(line => {
+          if (line.trim()) {
+            const li = document.createElement('li');
+            li.innerText = line.trim();
+            container.appendChild(li);
           }
+        });
       }
-      textToBullets('job1_desc', 'p_job1_desc');
-      textToBullets('job2_desc', 'p_job2_desc');
-      textToBullets('job3_desc', 'p_job3_desc');
-      textToBullets('profdev', 'p_profdev');
-
-      function textToList(inputId, containerId) {
-          const input = getVal(inputId);
-          const container = document.getElementById(containerId);
-          container.innerHTML = '';
-          if(input.trim()) {
-              input.split('\n').forEach(line => {
-                  if(line.trim()) {
-                      const li = document.createElement('li');
-                      li.innerText = line.trim();
-                      container.appendChild(li);
-                  }
-              });
-          }
-      }
-      textToList('certs', 'p_certs');
-      textToList('awards', 'p_awards');
-
-      function commaToList(inputId, containerId) {
-          const input = getVal(inputId);
-          const container = document.getElementById(containerId);
-          container.innerHTML = '';
-          if(input.trim()) {
-              input.split(',').forEach(item => {
-                  if(item.trim()) {
-                      const li = document.createElement('li');
-                      li.innerText = item.trim();
-                      container.appendChild(li);
-                  }
-              });
-          }
-      }
-      commaToList('languages', 'p_languages');
-
-      function commaToGrid(inputId, containerId) {
-          const input = getVal(inputId);
-          const container = document.getElementById(containerId);
-          container.innerHTML = '';
-          if(input.trim()) {
-              input.split(',').forEach(item => {
-                  if(item.trim()) {
-                      const span = document.createElement('span');
-                      span.className = 'expertise-item';
-                      span.innerText = item.trim();
-                      container.appendChild(span);
-                  }
-              });
-          }
-      }
-      commaToGrid('expertise', 'p_expertise');
     }
-  </script>
+    textToList('certs', 'p_certs');
+    textToList('awards', 'p_awards');
+
+    function commaToList(inputId, containerId) {
+      const input = getVal(inputId);
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (input.trim()) {
+        input.split(',').forEach(item => {
+          if (item.trim()) {
+            const li = document.createElement('li');
+            li.innerText = item.trim();
+            container.appendChild(li);
+          }
+        });
+      }
+    }
+    commaToList('languages', 'p_languages');
+
+    function commaToGrid(inputId, containerId) {
+      const input = getVal(inputId);
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (input.trim()) {
+        input.split(',').forEach(item => {
+          if (item.trim()) {
+            const span = document.createElement('span');
+            span.className = 'expertise-item';
+            span.innerText = item.trim();
+            container.appendChild(span);
+          }
+        });
+      }
+    }
+    commaToGrid('expertise', 'p_expertise');
+  }
+</script>
 </body>
 </html>
